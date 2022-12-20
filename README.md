@@ -82,17 +82,20 @@ This checkpoint comes with integration tests on most of the routes.
 
 ![](https://media.giphy.com/media/sECT307ocX509Gh9bI/giphy.gif)
 
-- :loud_sound: GET `/api/tracks`
-- :loud_sound: GET `/api/tracks/1`
-- :loud_sound: POST `/api/tracks`
-- :loud_sound: PUT `/api/tracks`
-- :loud_sound: DELETE `/api/tracks`
-- :headphones: GET `/api/albums`
-- :headphones: GET `/api/albums/1`
-- :headphones: GET `/api/albums/1/tracks`
-- :headphones: POST `/api/albums`
-- :headphones: PUT `/api/albums`
-- :headphones: DELETE `/api/albums`
+- :loud_sound: GET `/api/tracks` - should return a JSON response - an array containing all the rows from the track table, and a status of 200.
+- :loud_sound: GET `/api/tracks/:id` - should return a JSON response - an object containing the track with the given id. If no such track - respond with a 404 Status
+- :loud_sound: POST `/api/tracks` - should create a new row in the table AND return the newly created track in a JSON response with status 201. Hint: INSERT INTO queries also return a result for the callback function we are using from mysql2
+- :loud_sound: PUT `/api/tracks/:id` - should change the title only of a track with the given id and respond with a status of 204 - No Content.
+- :loud_sound: DELETE `/api/tracks/:id` - should delete the track with the given id and respond with a status of 204 - No Content
+- :headphones: GET `/api/albums` - should return a JSON response - an array containing all the rows from the album table and a status of 200.
+- :headphones: GET `/api/albums/:id` - should return a JSON response - an object containing the album with a given id and a status of 200. If no such album found respond with a 404 status.
+- :headphones: GET `/api/albums/:id/tracks` - should return a JSON response - an array containing all the tracks from an album with given id.
+- :headphones: POST `/api/albums` - should create a new album in the table AND return the newly created album in a JSON response with status 201.
+- :headphones: PUT `/api/albums/:id` - should change the title only of an album with given id and return a response with status 204 - No Content
+- :headphones: DELETE `/api/albums/:id` - should delete the album with given id and return a response with status 204 - No Content.
+
+:warning: Run the test suite after you're done with a route to check if it's working correctly.
+:warning: You can inspect the tests to see what the intended response and status are
 
 :warning: You **NEED** to have a track in your database with the `id` 1, and an album with the `id` 1.  
 Otherwise, 3 tests are going to fail.
