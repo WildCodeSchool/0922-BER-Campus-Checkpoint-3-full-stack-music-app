@@ -3,6 +3,7 @@ const getAlbumById = require('./getAlbumById');
 const postAlbum = require('./postAlbum');
 const updateAlbum = require('./updateAlbum');
 const deleteAlbum = require('./deleteAlbum');
+const getAllAlbumTracks = require('./getAllAlbumTracks');
 
 module.exports = {
   getAllAlbums,
@@ -10,4 +11,5 @@ module.exports = {
   postAlbum,
   updateAlbum,
   deleteAlbum,
+  getAllAlbumTracks,
 };
