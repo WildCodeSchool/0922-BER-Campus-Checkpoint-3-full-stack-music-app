@@ -5,14 +5,12 @@ const {
   getTrackById,
   postTrack,
   updateTrack,
-
-  //   deleteAlbum,
+  deleteTrack,
 } = require('../controllers/track');
 
 Router.get('/', getAllTracks);
 Router.get('/:id', getTrackById);
-
-// Router.delete('/:id', deleteAlbum);
+Router.delete('/:id', deleteTrack);
 Router.put('/:id', updateTrack);
 Router.post('/', postTrack);
 
