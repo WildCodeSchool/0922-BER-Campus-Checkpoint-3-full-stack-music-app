@@ -3,7 +3,7 @@ const connection = require('../../../database');
 module.exports = (req, res) => {
   const id = parseInt(req.params.id);
   const { title } = req.body;
-  const sqlQuery = `update track set title = ? where id_track = ?`;
+  const sqlQuery = `update track set title = ? where id = ?`;
   connection
     .promise()
     .query(sqlQuery, [title, id])

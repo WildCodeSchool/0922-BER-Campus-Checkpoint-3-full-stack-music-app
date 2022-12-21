@@ -2,7 +2,7 @@ const connection = require('../../../database');
 
 module.exports = (req, res) => {
   const id = parseInt(req.params.id);
-  const sqlQuery = `delete from track where id_track = ?`;
+  const sqlQuery = `delete from track where id = ?`;
   connection
     .promise()
     .query(sqlQuery, [id])

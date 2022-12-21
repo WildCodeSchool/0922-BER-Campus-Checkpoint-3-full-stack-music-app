@@ -5,5 +5,5 @@ module.exports = (req, res) => {
   connection
     .promise()
     .query(sqlQuery)
-    .then(([result]) => res.send(result));
+    .then(([result]) => res.status(200).send(result));
 };
