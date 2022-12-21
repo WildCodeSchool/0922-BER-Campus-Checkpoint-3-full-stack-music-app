@@ -3,6 +3,8 @@ const connection = require('./db');
 const serverPort = process.env.PORT || 3000;
 const app = express();
 
+app.use(express.json());
+
 connection.connect((err) => {
   if (err) {
     console.error('error connecting to db');
@@ -45,14 +47,20 @@ app.get('/api/tracks/:id', (req, res) => {
 });
 
 app.post('/api/tracks', (req, res) => {
+  const { title, youtube_url, album_id } = req.body;
   connection
     .promise()
-    .query('INSERT INTO track (title, youtube_url) VALUES (?, ?)', [
-      title,
-      youtube_url,
-    ])
+    .query(
+      'INSERT INTO track (title, youtube_url, album_id) VALUES (?, ?, ?)',
+      [title, youtube_url, album_id]
+    )
     .then(([result]) => {
-      const createdTrack = { id: result.insertId, title, youtube_url };
+      const createdTrack = {
+        id: result.insertId,
+        title,
+        youtube_url,
+        album_id,
+      };
       res.status(201).json(createdTrack);
     })
     .catch((err) => {
@@ -132,14 +140,13 @@ app.get('/api/albums/:id/tracks', (req, res) => {
 });
 
 app.post('/api/albums', (req, res) => {
+  const { title, genre, picture, artist } = req.body;
   connection
     .promise()
-    .query('INSERT INTO album (title, genre, picture, artist) VALUES (?, ?)', [
-      title,
-      genre,
-      picture,
-      artist,
-    ])
+    .query(
+      'INSERT INTO album (title, genre, picture, artist) VALUES (?, ?, ?, ?)',
+      [title, genre, picture, artist]
+    )
     .then(([result]) => {
       const createdTrack = {
         id: result.insertId,
