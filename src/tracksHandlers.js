@@ -6,8 +6,7 @@ const getTracks = (req, res) => {
     .query('select * from tracks')
     .then(([tracks]) => {
       if (tracks[0] != null) {
-        res.json(tracks);
-        res.status(200);
+        res.status(200).json(tracks);
       } else {
         res.status(404).send('Not Found');
       }
@@ -21,14 +20,10 @@ const getTracks = (req, res) => {
 const getTrackById = (req, res) => {
   connection
     .promise()
-    .query('select * from tracks')
-    .then(([tracks]) => {
-      const id_track = parseInt(req.params.id_track);
-
-      const track = tracks.find((track) => track.id_track === id_track);
-
-      if (track != null) {
-        res.json(track);
+    .query('select * from tracks where id = ?', [req.params.id_track])
+    .then(([track]) => {
+      if (track.length !== 0) {
+        res.json(...track);
       } else {
         res.status(404).send('Not Found');
       }
@@ -37,7 +32,7 @@ const getTrackById = (req, res) => {
 
 const postTrack = (req, res) => {
   const { title, youtube_url, id_album } = req.body;
-
+  const track = req.body;
   connection
     .promise()
     .query(
@@ -45,7 +40,8 @@ const postTrack = (req, res) => {
       [title, youtube_url, id_album]
     )
     .then(([result]) => {
-      res.location(`/api/tracks/${result.insertId}`).sendStatus(201);
+      track.id = result.insertId;
+      res.status(201).send(track);
     })
     .catch((err) => {
       console.error(err);
@@ -54,12 +50,14 @@ const postTrack = (req, res) => {
 };
 
 const updateTrack = (req, res) => {
-  const id_track = parseInt(req.params.id_track);
   const { title } = req.body;
 
   connection
     .promise()
-    .query('UPDATE tracks SET title = ? WHERE id_track = ?', [title, id_track])
+    .query('UPDATE tracks SET title = ? WHERE id = ?', [
+      title,
+      +req.params.id_track,
+    ])
     .then(([result]) => {
       if (result.affectedRows === 0) {
         res.sendStatus(404);
@@ -74,10 +72,9 @@ const updateTrack = (req, res) => {
 };
 
 const deleteTrack = (req, res) => {
-  const id_track = parseInt(req.params.id_track);
   connection
     .promise()
-    .query('DELETE FROM tracks WHERE id_track = ?', [id_track])
+    .query('DELETE FROM tracks WHERE id = ?', [req.params.id_track])
     .then(([result]) => {
       if (result.affectedRows === 0) {
         res.status(404).send('Not Found');

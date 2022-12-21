@@ -6,8 +6,7 @@ const getAlbums = (req, res) => {
     .query('select * from albums')
     .then(([albums]) => {
       if (albums[0] != null) {
-        res.json(albums);
-        res.status(200);
+        res.status(200).json(albums);
       } else {
         res.status(404).send('Not Found');
       }
@@ -21,13 +20,22 @@ const getAlbums = (req, res) => {
 const getAlbumById = (req, res) => {
   connection
     .promise()
-    .query('select * from albums')
-    .then(([albums]) => {
-      const id_album = parseInt(req.params.id_album);
+    .query('select * from albums where id=?', [+req.params.id_album])
+    .then(([album]) => {
+      if (album.length !== 0) {
+        res.json(...album);
+      } else {
+        res.status(404).send('Not Found');
+      }
+    });
+};
 
-      const album = albums.find((album) => album.id_album === id_album);
-
-      if (album != null) {
+const getAlbumTracks = (req, res) => {
+  connection
+    .promise()
+    .query('select * from tracks where id_album=?', [req.params.id_album])
+    .then(([album]) => {
+      if (album.length !== 0) {
         res.json(album);
       } else {
         res.status(404).send('Not Found');
@@ -37,7 +45,7 @@ const getAlbumById = (req, res) => {
 
 const postAlbum = (req, res) => {
   const { title, genre, picture, artist } = req.body;
-
+  const newAlbum = req.body;
   connection
     .promise()
     .query(
@@ -45,20 +53,22 @@ const postAlbum = (req, res) => {
       [title, genre, picture, artist]
     )
     .then(([result]) => {
-      res.location(`/api/tracks/${result.insertId}`).sendStatus(201);
+      newAlbum.id = result.insertId;
+      res.status(201).json(newAlbum);
     })
     .catch((err) => {
       console.error(err);
       res.status(500).send('Error saving the album');
     });
 };
+
 const updateAlbum = (req, res) => {
   const id_album = parseInt(req.params.id_album);
   const { title } = req.body;
 
   connection
     .promise()
-    .query('UPDATE albums SET title = ? WHERE id_album = ?', [title, id_album])
+    .query('UPDATE albums SET title = ? WHERE id = ?', [title, id_album])
     .then(([result]) => {
       if (result.affectedRows === 0) {
         res.sendStatus(404);
@@ -73,10 +83,10 @@ const updateAlbum = (req, res) => {
 };
 
 const deleteAlbum = (req, res) => {
-  const id_album = parseInt(req.params.id_album);
+  const id_album = req.params.id_album;
   connection
     .promise()
-    .query('DELETE FROM albums WHERE id_album = ?', [id_album])
+    .query('DELETE FROM albums WHERE id = ?', [id_album])
     .then(([result]) => {
       if (result.affectedRows === 0) {
         res.status(404).send('Not Found');
@@ -96,4 +106,5 @@ module.exports = {
   getAlbumById,
   updateAlbum,
   deleteAlbum,
+  getAlbumTracks,
 };

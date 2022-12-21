@@ -21,6 +21,7 @@ const albumsHandlers = require('./albumsHandlers');
 app.post('/api/albums', albumsHandlers.postAlbum);
 app.get('/api/albums', albumsHandlers.getAlbums);
 app.get('/api/albums/:id_album', albumsHandlers.getAlbumById);
+app.get('/api/albums/:id_album/tracks', albumsHandlers.getAlbumTracks);
 app.put('/api/albums/:id_album', albumsHandlers.updateAlbum);
 app.delete('/api/albums/:id_album', albumsHandlers.deleteAlbum);
 
