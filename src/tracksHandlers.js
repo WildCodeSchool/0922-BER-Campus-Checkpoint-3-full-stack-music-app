@@ -7,7 +7,7 @@ const getTracks = (req, res) => {
     .then(([tracks]) => {
       if (tracks[0] != null) {
         res.json(tracks);
-        res.status(202);
+        res.status(200);
       } else {
         res.status(404).send('Not Found');
       }
