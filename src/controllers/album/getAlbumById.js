@@ -6,5 +6,11 @@ module.exports = (req, res) => {
   connection
     .promise()
     .query(sqlQuery, [id])
-    .then(([result]) => res.status(200).json(result[0]));
+    .then(([result]) => {
+      if (result[0] != null) {
+        res.status(200).json(result[0]);
+      } else {
+        res.sendStatus(404);
+      }
+    });
 };

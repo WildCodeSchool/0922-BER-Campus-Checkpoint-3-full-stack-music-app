@@ -7,11 +7,8 @@ module.exports = (req, res) => {
     .promise()
     .query(sqlQuery, [id])
     .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send('Not Found');
-      } else {
-        res.sendStatus(204);
-      }
+      if (result.affectedRows) res.sendStatus(204);
+      else res.sendStatus(404);
     })
     .catch((err) => {
       console.error(err);
