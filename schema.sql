@@ -8,21 +8,21 @@ SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0;
 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_ENGINE_SUBSTITUTION';
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema albums
 -- -----------------------------------------------------
 
 -- -----------------------------------------------------
--- Schema mydb
+-- Schema albums
 -- -----------------------------------------------------
-CREATE SCHEMA IF NOT EXISTS `mydb` DEFAULT CHARACTER SET utf8 ;
-USE `mydb` ;
+CREATE SCHEMA IF NOT EXISTS `albums` DEFAULT CHARACTER SET utf8 ;
+USE `albums` ;
 
 -- -----------------------------------------------------
--- Table `mydb`.`track`
+-- Table `albums`.`track`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`track` ;
+DROP TABLE IF EXISTS `albums`.`track` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`track` (
+CREATE TABLE IF NOT EXISTS `albums`.`track` (
   `id_track` INT NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(128) NOT NULL,
   `youtube_url` VARCHAR(255) NOT NULL,
@@ -31,11 +31,11 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`album`
+-- Table `albums`.`album`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`album` ;
+DROP TABLE IF EXISTS `albums`.`album` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`album` (
+CREATE TABLE IF NOT EXISTS `albums`.`album` (
   `id_album` INT NOT NULL AUTO_INCREMENT,
   `title` VARCHAR(255) NOT NULL,
   `genre` VARCHAR(255) NOT NULL,
@@ -46,23 +46,23 @@ ENGINE = InnoDB;
 
 
 -- -----------------------------------------------------
--- Table `mydb`.`have`
+-- Table `albums`.`have`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `mydb`.`have` ;
+DROP TABLE IF EXISTS `albums`.`have` ;
 
-CREATE TABLE IF NOT EXISTS `mydb`.`have` (
+CREATE TABLE IF NOT EXISTS `albums`.`have` (
   `id_album` INT NOT NULL,
   `id_track` INT NOT NULL,
   INDEX `id_album_idx` (`id_album` ASC) VISIBLE,
   INDEX `fk_have_track1_idx` (`id_track` ASC) VISIBLE,
   CONSTRAINT `id_album`
     FOREIGN KEY (`id_album`)
-    REFERENCES `mydb`.`album` (`id_album`)
+    REFERENCES `albums`.`album` (`id_album`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
   CONSTRAINT `fk_have_track1`
     FOREIGN KEY (`id_track`)
-    REFERENCES `mydb`.`track` (`id_track`)
+    REFERENCES `albums`.`track` (`id_track`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
