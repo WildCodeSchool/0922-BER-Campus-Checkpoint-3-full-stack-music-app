@@ -1,191 +1,183 @@
 require('dotenv').config();
-const connection = require('./db')
 const express = require('express');
+const database = require('./db');
 
 
 const app = express();
+
 app.use(express.json());
 
-// eslint-disable-next-line
-const port = process.env.APP_PORT ?? 5001;
+database
+  .promise()
+  .query('use mydb;')
+  .catch((e) => console.error(e));
 
-const database = require('./db');
-
-const welcome = (req, res) => {
-  res.send('Welcome to music');
-};
-app.get('/', welcome);
+app.get('/', (req, res) => {
+  res.send('welcome to main route');
+});
 
 app.get('/api/tracks', (req, res) => {
+  const sqlQuery = 'select * from track';
   database
-    .query('select * from track')
-    .then(([tracks]) => {
-      res.send(tracks);
-    })
-    .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      res.status(500).send('Error retrieving data from database');
-    });
-});
-app.get('/api/albums', (req, res) => {
-  database
-    .query('select * from album')
-    .then(([albums]) => {
-      res.status(200).json(albums);
-    })
-    .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      res.status(500).send('Error retrieving data from database');
-    });
+    .promise()
+    .query(sqlQuery)
+    .then(([result]) => res.send(result));
 });
 
 app.get('/api/tracks/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  database
-    .query('select * from track where id = ?', [id])
-    .then(([tracks]) => {
-      if (tracks[0] != null) {
-        res.send(tracks[0]);
-      } else {
-        res.status(404).send('Not Found');
-      }
-    })
-    .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      res.status(500).send('Error retrieving data from database');
-    });
-});
-
-app.get('/api/albums/:id', (req, res) => {
   let { id } = req.params;
   database
-    .query('select * from album where id = ?', [id])
-    .then(([albums]) => {
-      if (albums[0] != null) {
-        res.json(albums[0]);
+    .promise()
+    .query('SELECT * FROM track WHERE id = ?', [id])
+    .then(([results]) => {
+      if (!results.length) {
+        res.status(404).send({
+          status: '404',
+          msg: 'Not found',
+          data: null,
+        });
       } else {
-        res.sendStatus(404);
+        res.json(results[0]);
       }
     })
     .catch((err) => {
-      // eslint-disable-next-line no-console
       console.error(err);
-      res.status(500).send('Error retrieving data from database');
+      res.status(500).send('Error retrieving track from db');
     });
 });
 
 app.post('/api/tracks', (req, res) => {
   const { title, youtube_url, id_album } = req.body;
   database
-    .query(
-      'INSERT INTO track ( title, youtube_url, id_album) VALUES ( ?, ?, ?)',
-      [title, youtube_url, id_album]
-    )
-    .then(([track]) => {
-      const createdPost = { id: track.insertId, title, youtube_url, id_album };
+    .promise()
+    .query('INSERT INTO track (title,youtube_url,id_album) VALUES (?,?,?)', [
+      title,
+      youtube_url,
+      id_album,
+    ])
+    .then(([result]) => {
+      const createdPost = { id: result.insertId, title, youtube_url, id_album };
       res.status(201).json(createdPost);
     })
     .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      res.status(500).send('Error saving the track');
-    });
-});
-
-app.post('/api/albums', (req, res) => {
-  const { title, genre, picture, artist } = req.body;
-  database
-    .query(
-      'INSERT INTO album ( title, genre, picture, artist) VALUES (?, ?, ?, ?)',
-      [title, genre, picture, artist]
-    )
-    .then(([album]) => {
-      const createdPost = { id: album.insertId, title, genre, picture, artist };
-      res.status(201).json(createdPost);
-    })
-    .catch((err) => {
-      // eslint-disable-next-line no-console
       console.error(err);
       res.sendStatus(500);
     });
 });
 
 app.put('/api/tracks/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const { title } = req.body;
   database
-    .query('UPDATE track SET  title = ? WHERE id = ?', [title, id])
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send('Not Found');
-      } else {
-        res.sendStatus(204);
-      }
+    .promise()
+    .query('UPDATE track SET ? WHERE id = ?', [req.body, req.params.id])
+    .then(() => {
+      res.sendStatus(204);
     })
     .catch((err) => {
-      // eslint-disable-next-line no-console
       console.error(err);
       res.sendStatus(500);
     });
 });
-app.put('/api/albums/:id', (req, res) => {
-  const id = parseInt(req.params.id);
-  const { title } = req.body;
-  database
-    .query('UPDATE album SET  title = ? WHERE id = ?', [title, id])
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send('Not Found');
-      } else {
-        res.sendStatus(204);
-      }
-    })
-    .catch((err) => {
-      // eslint-disable-next-line no-console
-      console.error(err);
-      res.status(500).send('Error updating the movie');
-    });
-});
+
 app.delete('/api/tracks/:id', (req, res) => {
-  const id = parseInt(req.params.id);
   database
-    .query('DELETE FROM track WHERE id = ?', [id])
+    .promise()
+    .query('DELETE FROM track WHERE id = ?', [req.params.id])
     .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send('Not Found');
-      } else {
-        res.sendStatus(204);
-      }
+      if (result.affectedRows) res.sendStatus(204);
+      else res.sendStatus(404);
     })
     .catch((err) => {
-      // eslint-disable-next-line no-console
       console.error(err);
-      res.status(500).send('Error deleting movie');
+      res.sendStatus(500);
     });
 });
-app.delete('/api/albums/:id', (req, res) => {
+app.get('/api/albums', (req, res) => {
+  const sqlQuery = 'select * from album';
+  database
+    .promise()
+    .query(sqlQuery)
+    .then(([result]) => res.status(200).json(result));
+});
+
+app.get('/api/albums/:id', (req, res) => {
   let { id } = req.params;
   database
-    .query('DELETE FROM album WHERE id = ?', [id])
-    .then(([result]) => {
-      if (result.affectedRows === 0) {
-        res.status(404).send('Not Found');
+    .promise()
+    .query('SELECT * FROM album WHERE id = ?', [id])
+    .then(([results]) => {
+      if (!results.length) {
+        res.status(404).send({
+          status: '404',
+          msg: 'Not found',
+          data: null,
+        });
       } else {
-        res.sendStatus(204);
+        res.json(results[0]);
       }
     })
     .catch((err) => {
-      // eslint-disable-next-line no-console
       console.error(err);
-      res.status(500).send('Error deleting movie');
+      res.status(500).send('Error retrieving album from db');
     });
 });
+
+app.post('/api/albums', (req, res) => {
+  const { title, genre, picture, artist } = req.body;
+  database
+    .promise()
+    .query('INSERT INTO album (title,genre,picture,artist) VALUES (?,?,?,?)', [
+      title,
+      genre,
+      picture,
+      artist,
+    ])
+    .then(([result]) => {
+      const createdPost = {
+        id: result.insertId,
+        title,
+        genre,
+        picture,
+        artist,
+      };
+      res.status(201).json(createdPost);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+});
+
+app.put('/api/albums/:id', (req, res) => {
+  database
+    .promise()
+    .query('UPDATE album SET ? WHERE id = ?', [req.body, req.params.id])
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+});
+
+app.delete('/api/albums/:id', (req, res) => {
+  database
+    .promise()
+    .query('DELETE FROM album WHERE id = ?', [req.params.id])
+    .then(([result]) => {
+      if (result.affectedRows) res.sendStatus(204);
+      else res.sendStatus(404);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.sendStatus(500);
+    });
+});
+
 app.get('/api/albums/:id/tracks', (req, res) => {
   let { id } = req.params;
   database
+    .promise()
     .query('SELECT * FROM track WHERE id_album = ?', [id])
     .then(([results]) => {
       if (!results.length) {
@@ -199,10 +191,10 @@ app.get('/api/albums/:id/tracks', (req, res) => {
       }
     })
     .catch((err) => {
-      // eslint-disable-next-line no-console
       console.error(err);
       res.status(500).send('Error retrieving album from db');
     });
 });
 
+// Please keep this module.exports app, we need it for the tests !
 module.exports = app;
