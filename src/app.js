@@ -1,6 +1,5 @@
 const express = require('express');
 const connection = require('./db');
-const serverPort = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());
@@ -12,8 +11,6 @@ connection.connect((err) => {
     console.log('connected to db');
   }
 });
-
-app.listen(serverPort);
 
 module.exports = app;
 
@@ -47,19 +44,19 @@ app.get('/api/tracks/:id', (req, res) => {
 });
 
 app.post('/api/tracks', (req, res) => {
-  const { title, youtube_url, album_id } = req.body;
+  const { title, youtube_url, id_album } = req.body;
   connection
     .promise()
     .query(
-      'INSERT INTO track (title, youtube_url, album_id) VALUES (?, ?, ?)',
-      [title, youtube_url, album_id]
+      'INSERT INTO track (title, youtube_url, id_album) VALUES (?, ?, ?)',
+      [title, youtube_url, id_album]
     )
     .then(([result]) => {
       const createdTrack = {
         id: result.insertId,
         title,
         youtube_url,
-        album_id,
+        id_album,
       };
       res.status(201).json(createdTrack);
     })
@@ -69,12 +66,13 @@ app.post('/api/tracks', (req, res) => {
     });
 });
 
-app.put('/tracks/:id', (req, res) => {
+app.put('/api/tracks/:id', (req, res) => {
+  const { title } = req.body;
   connection
     .promise()
-    .query('UPDATE track SET ? WHERE id = ?', [req.body, req.params.id])
+    .query('UPDATE track SET title = ? WHERE id = ?', [title, req.params.id])
     .then(([result]) => {
-      res.sendStatus(204).send('No Content');
+      return res.sendStatus(204);
     })
     .catch((err) => {
       console.error(err);
@@ -82,12 +80,12 @@ app.put('/tracks/:id', (req, res) => {
     });
 });
 
-app.delete('/tracks/:id', (req, res) => {
+app.delete('/api/tracks/:id', (req, res) => {
   connection
     .promise()
     .query('DELETE FROM track WHERE id = ?', [req.params.id])
     .then(([result]) => {
-      if (result.affectedRows) res.sendStatus(204).send('No Content');
+      if (result.affectedRows) return res.sendStatus(204);
       else res.sendStatus(404);
     })
     .catch((err) => {
@@ -117,7 +115,7 @@ app.get('/api/albums/:id', (req, res) => {
     .promise()
     .query('SELECT * FROM album WHERE id = ?', [id])
     .then(([results]) => {
-      if (results.length) {
+      if (results.length !== 0) {
         res.status(200).json(results[0]);
       } else {
         res.sendStatus(404);
@@ -129,9 +127,9 @@ app.get('/api/albums/:id/tracks', (req, res) => {
   const { id } = req.params;
   connection
     .promise()
-    .query('SELECT * FROM album')
+    .query('SELECT * FROM track WHERE id_album = ?', [id])
     .then(([results]) => {
-      if (results.length) {
+      if (results.length !== 0) {
         res.status(200).json(results);
       } else {
         res.sendStatus(404);
@@ -163,12 +161,13 @@ app.post('/api/albums', (req, res) => {
     });
 });
 
-app.put('/albums/:id', (req, res) => {
+app.put('/api/albums/:id', (req, res) => {
+  const { title } = req.body;
   connection
     .promise()
-    .query('UPDATE track SET ? WHERE id = ?', [req.body, req.params.id])
+    .query('UPDATE album SET title = ? WHERE id = ?', [title, req.params.id])
     .then(([result]) => {
-      res.sendStatus(204).send('No Content');
+      res.sendStatus(204);
     })
     .catch((err) => {
       console.error(err);
@@ -176,12 +175,12 @@ app.put('/albums/:id', (req, res) => {
     });
 });
 
-app.delete('/albums/:id', (req, res) => {
+app.delete('/api/albums/:id', (req, res) => {
   connection
     .promise()
     .query('DELETE FROM album WHERE id = ?', [req.params.id])
     .then(([result]) => {
-      if (result.affectedRows) res.sendStatus(204).send('No Content');
+      if (result.affectedRows !== 0) return res.sendStatus(204);
       else res.sendStatus(404);
     })
     .catch((err) => {
