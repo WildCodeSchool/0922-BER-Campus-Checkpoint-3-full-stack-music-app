@@ -53,8 +53,48 @@ const postTrack = (req, res) => {
     });
 };
 
+const updateTrack = (req, res) => {
+  const id_track = parseInt(req.params.id_track);
+  const { title } = req.body;
+
+  connection
+    .promise()
+    .query('UPDATE tracks SET title = ? WHERE id_track = ?', [title, id_track])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.sendStatus(404);
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error editing the track');
+    });
+};
+
+const deleteTrack = (req, res) => {
+  const id_track = parseInt(req.params.id_track);
+  connection
+    .promise()
+    .query('DELETE FROM tracks WHERE id_track = ?', [id_track])
+    .then(([result]) => {
+      if (result.affectedRows === 0) {
+        res.status(404).send('Not Found');
+      } else {
+        res.sendStatus(204);
+      }
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('Error deleting the track');
+    });
+};
+
 module.exports = {
   postTrack,
   getTracks,
   getTrackById,
+  updateTrack,
+  deleteTrack,
 };

@@ -14,6 +14,8 @@ const tracksHandlers = require('./tracksHandlers');
 app.post('/api/tracks', tracksHandlers.postTrack);
 app.get('/api/tracks', tracksHandlers.getTracks);
 app.get('/api/tracks/:id_track', tracksHandlers.getTrackById);
+app.put('/api/tracks/:id_track', tracksHandlers.updateTrack);
+app.delete('/api/tracks/:id_track', tracksHandlers.deleteTrack);
 
 // Please keep this module.exports app, we need it for the tests !
 module.exports = app;
